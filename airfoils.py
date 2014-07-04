@@ -5,13 +5,14 @@ manipulate airfoil data and write it to new text file that can be used in solidw
 '''
 import numpy as np
 from matplotlib.pyplot import *
-import csv
 import argparse
 
 #takes airfoil data, scales it, and returns it as a list of "x y" paired strings
 def scale_airfoil(data_in, x):
     with open(data_in) as input_file:
-        data_lists = list(csv.reader(input_file))
+        data_lists = []
+        for line in input_file:
+            data_lists.append(line.strip().split())
     scaled_lists = []
     for lst in data_lists:
         scaled_list = []
@@ -60,10 +61,10 @@ def plot_data(data_in, x):
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser(description="Takes x and y data columns (sparated by commas) for airfoil curves and scales and writes them to new text file in solidworks compatible format")
-    parser.add_argument("data_in", type=str, help="must be .txt format containing x and y data columns separated by commas")
+    parser.add_argument("data_in", type=str, help="must be .txt format containing x and y data columns. if data contains third column for z coordinates, it will be ignored and replaced with zeros. any whitespace between data points is used to split the data and eliminated")
     parser.add_argument("x", type=float, help="float type, scales the data to data * x")
-    parser.add_argument("data_out", nargs="?", type=str, help="filename to write to. must be .txt format")
-    parser.add_argument("-p", "--plot", action="store_true", help="plots the scaled data. if data_out given, new file will still be written with scaled data")
+    parser.add_argument("data_out", nargs="?", type=str, help="filename to write processed data to. must be .txt format")
+    parser.add_argument("-p", "--plot", action="store_true", help="plots the scaled data. if data_out given, new file will still be written")
     args = parser.parse_args()
 
     if args.data_out:
