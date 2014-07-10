@@ -23,19 +23,18 @@ class airfoil(object):
         x_array = np.asarray(x_array)
         y_array = np.asarray(y_array)
         if n > 0:
-            yU_data = []
-            yL_data = []
-            for num in y_array:
-                if num > 0.:
-                    yU_data.insert(0, num)
-                elif num < 0.:
-                    yL_data.append(num)
+            #yU_data = []
+            #yL_data = []
+            #for num in y_array:
+            #    if num > 0.:
+            #        yU_data.insert(0, num)
+            #    elif num < 0.:
+            #        yL_data.append(num)
             c = max(x_array)                            # chord length
             t = (max(y_array) - min(y_array)) / c       # max thickness
             m = float(self.data_in[-8]) / 100.          # max camber as % of c
             p = float(self.data_in[-7]) / 10.           # position of m as % of c
             x = np.linspace(0, c, n)                    # range of x position
-            show()
             a_o = 0.2969                                # coefficients found by NACA
             a_1 = -0.1260
             a_2 = -0.3516
@@ -63,9 +62,8 @@ class airfoil(object):
         filename = self.data_in[:-4] + "_S%s.txt" % s
         new_file = open(filename, 'w')
         x_array, y_array = self.scale(s, n)
-        #scaled_arrays = self.scale(x, n)
         for i in range(len(x_array)):
-            string_pair = str(x_array[i]) + " " + str(y_array[i]) + " " "0.0"
+            string_pair = str(x_array[i]) + " " + str(y_array[i]) + " 0.0"
             new_file.write(string_pair + "\n")
         new_file.close()
 
