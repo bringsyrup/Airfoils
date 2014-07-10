@@ -47,7 +47,7 @@ class airfoil(object):
             new_file.write(string_pair + '\n')
         new_file.close()
 
-    def fix_data(self, n, x=1.0, opt=False):
+    def fix_data(self, x=1.0, opt=False):
         scaled_lists = self.scale(x, opt)
         x_list = []
         y_list = []
@@ -56,32 +56,10 @@ class airfoil(object):
             y_list.append(pair[1])
         x_array = np.asarray(x_list)
         y_array = np.asarray(y_list)
-        if n >= 1:
-            #this option creates shitty data at the moment. working on it!
-            for i in range(len(x_array)):
-                if x_array[i] == y_array[i]:
-                    stop = i
-                    break
-            px_array = x_array[:stop+1]
-            py_array = y_array[:stop+1]
-            nx_array = x_array[stop:]
-            ny_array = y_array[stop:]
-            p_coeffs = np.polyfit(px_array, py_array, n)
-            n_coeffs = np.polyfit(nx_array, ny_array, n)
-            py_poly = np.poly1d(p_coeffs)
-            ny_poly = np.poly1d(n_coeffs)
-            px_fixed = np.linspace(min(px_array), max(px_array), 100)
-            py_fixed = py_poly(px_fixed)
-            nx_fixed = np.linspace(min(nx_array), max(nx_array), 100)
-            ny_fixed = ny_poly(nx_fixed)
-            x_fixed = np.concatenate([px_fixed, nx_fixed])
-            y_fixed = np.concatenate([py_fixed, ny_fixed])
-            return x_fixed, y_fixed
-        else:
-            return x_array, y_array
+        return x_array, y_array
 
-    def plot_data(self, n, x=1.0, opt=False):
-        x_array, y_array = self.fix_data(n, x, opt)
+    def plot_data(self, x=1.0, opt=False):
+        x_array, y_array = self.fix_data(x, opt)
         plot(x_array, y_array, linestyle="-")
         xlabel("x coordinates, any units")
         ylabel("y coordinates, any units")
@@ -120,11 +98,6 @@ if __name__=="__main__":
             action = "store_true",
             help = "plots the scaled data. if data_out given, new file will still be written"
             )
-    parser.add_argument("-f", "--fix",
-            action = "store",
-            type = int,
-            help = "attempts to fix data with too few data points with a polyfit"
-            )
     args = parser.parse_args()
     
     new_airfoil = airfoil(args.data_in)
@@ -134,27 +107,21 @@ if __name__=="__main__":
     else:
         opt_cond = False
 
-    if args.fix:
-        fix = args.fix
-    else:
-        fix = 0
-    
     if args.write:
         if args.scale and args.plot:
             new_airfoil.write_new(args.scale, opt_cond)
-            new_airfoil.plot_data(fix, args.scale, opt_cond)
-        #elif args.optimal and args.plot:
+            new_airfoil.plot_data(args.scale, opt_cond)
         elif args.scale:
             new_airfoil.write_new(args.scale, opt_cond)
         elif args.plot:
-            new_airfoil.plot_data(fix)
+            new_airfoil.plot_data()
         else:
             new_airfoil.write_new()
     elif args.plot:
         if args.scale:
-            new_airfoil.plot_data(fix, args.scale, opt_cond)
+            new_airfoil.plot_data(args.scale, opt_cond)
         else:
-            new_airfoil.plot_data(fix)
+            new_airfoil.plot_data()
     else:
         print "Not enough input arguments. Use --help option for required inputs"
 
