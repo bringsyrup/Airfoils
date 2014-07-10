@@ -20,6 +20,8 @@ class airfoil(object):
         for pair in data_arrays:
             x_array.append(pair[0])
             y_array.append(pair[1])
+        x_array = np.asarray(x_array)
+        y_array = np.asarray(y_array)
         if n > 0:
             yU_data = []
             yL_data = []
@@ -50,13 +52,11 @@ class airfoil(object):
             xL = np.asarray(x + y_t*np.sin(theta))
             yU = np.asarray(y_c + y_t*np.cos(theta))
             yL = np.asarray(y_c - y_t*np.cos(theta))
-            x_fixed = np.concatenate([xU, xL[::-1]])
-            y_fixed = np.concatenate([yU, yL[::-1]])
-            x_array = x_fixed * s
-            y_array = y_fixed * s
+            x_array = np.concatenate([xU, xL[::-1]]) * s
+            y_array = np.concatenate([yU, yL[::-1]]) * s
         else:
-            x_array = x_array * s
-            y_array = y_array * s
+            x_array *= s
+            y_array *= s
         return x_array, y_array
 
     def write_new(self, s=1.0, n=0):
@@ -119,7 +119,7 @@ if __name__=="__main__":
             new_airfoil.write_new(args.scale, args.fix)
             new_airfoil.plot_data(args.scale, args.fix)
         elif args.scale and args.plot:
-            new_airfoil.write_new(args.scale)
+            new_airfoil.plot_data(args.scale)
             new_airfoil.write_new(args.scale)
         elif args.plot and args.fix:
             new_airfoil.plot_data(args.fix)
