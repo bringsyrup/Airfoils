@@ -23,13 +23,6 @@ class airfoil(object):
         x_array = np.asarray(x_array)
         y_array = np.asarray(y_array)
         if n > 0:
-            #yU_data = []
-            #yL_data = []
-            #for num in y_array:
-            #    if num > 0.:
-            #        yU_data.insert(0, num)
-            #    elif num < 0.:
-            #        yL_data.append(num)
             c = max(x_array)                            # chord length
             t = (max(y_array) - min(y_array)) / c       # max thickness
             m = float(self.data_in[-8]) / 100.          # max camber as % of c
