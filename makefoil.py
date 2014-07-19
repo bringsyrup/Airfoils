@@ -23,11 +23,11 @@ class newfoil(object):
             codename = "%s%s%s" % (str(self.max_camb)[0], str(self.pos_camb)[0], str(self.thick)[0:2])
             if self.max_camb <= 0. or self.pos_camb <= 0. or self.thick <= 0.:
                 if self.thick <= 0.:
-                    print "thickness of airfoil must be greater than zero"
-                    return
+                    print "sign error: thickness of airfoil must be greater than zero"
+                    return "invalid"
                 elif self.max_camb < 0. or self.pos_camb < 0.:
-                    print "camber parameters must be positive"
-                    return
+                    print "sign error: camber parameters must be positive"
+                    return "invalid"
                 else:
                     max_camb = 0.
                     pos_camb = 0.
@@ -37,8 +37,8 @@ class newfoil(object):
                 pos_camb = self.pos_camb/100.0
                 thick = self.thick/100.0
         else:
-            print "arguments must by integers of floats"
-            return
+            print "type error: arguments must by integers of floats"
+            return "invalid"
         a_o = 0.2969        #NACA coefficients
         a_1 = -0.1260
         a_2 = -0.3516
@@ -69,6 +69,9 @@ class newfoil(object):
 
     def graph_data(self, points, scale=1.0):
         x_data, y_data, codename = self.make_data(points, scale)
+        print x_data
+        if x_data == "invalid":
+            return
         plot(x_data, y_data, linestyle="-")
         xlabel("x data, arbitrary units")
         ylabel("y data, arbitrary units")
@@ -80,6 +83,8 @@ class newfoil(object):
 
     def write_data(self, points, scale=1.0):
         x_data, y_data, codename = self.make_data(points, scale)
+        if x_data == "invalid":
+            return
         filename = codename + ".txt"
         new_file = open(filename, "w")
         for index in range(len(x_data)):

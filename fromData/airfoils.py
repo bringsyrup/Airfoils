@@ -32,7 +32,7 @@ class airfoil(object):
         return scaled_lists    
 
     def write_new(self, x=1.0, opt=False):
-        filename = self.data_in[:-4] + "_S%s.txt" % x
+        filename = self.data_in[:-4] + "_%s.txt" % x
         new_file = open(filename, 'w')
         scaled_lists = self.scale(x, opt)
         for lst in scaled_lists:
@@ -83,7 +83,7 @@ if __name__=="__main__":
     
     parser.add_argument("-w", "--write",
             action = "store_true",
-            help = "writes manipulated data to new file with automated filename. overwrites existing filename if it exists already. see README.md for examples"
+            help = "writes manipulated data to new file with automated filename (adds an extention with the scaling factor). overwrites existing filename if it exists already. see README.md for examples"
             )
     parser.add_argument("-s", "--scale",
             action = "store",
@@ -96,7 +96,7 @@ if __name__=="__main__":
             )
     parser.add_argument("-p","--plot",
             action = "store_true",
-            help = "plots the scaled data. if data_out given, new file will still be written"
+            help = "plots the scaled data"
             )
     args = parser.parse_args()
     
