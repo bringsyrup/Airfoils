@@ -20,7 +20,7 @@ class newfoil(object):
         maximum camber as percentage of chord, position of camber as percentage of chord, maximum thickness of airfoil as percentage of chord, number of points to plot, scaling factor, respectively
         '''
         if isinstance(self.max_camb, (float, int)) and isinstance(self.pos_camb, (float, int)) and isinstance(self.thick, (float, int)): 
-            codename = "NACA_%s%s%s" % (self.max_camb[0], self.pos_camb[0], self.thick[0:2])
+            codename = "%s%s%s" % (str(self.max_camb)[0], str(self.pos_camb)[0], str(self.thick)[0:2])
             if self.max_camb <= 0. or self.pos_camb <= 0. or self.thick <= 0.:
                 if self.thick <= 0.:
                     print "thickness of airfoil must be greater than zero"
@@ -43,10 +43,10 @@ class newfoil(object):
         a_1 = -0.1260
         a_2 = -0.3516
         a_3 = 0.2843
-        1_4 = -0.1036
+        a_4 = -0.1036
         chord = 1.0         #set make length of airfoil for placeholder
         x_range = np.linspace(0, chord, points / 2)
-        pos_index = np.where(x_range == pos_camb/chord) #x_range index of camber position
+        pos_index = (np.abs(x_range - pos_camb/chord)).argmin()
         y_symmetric = thick*chord/.2 \
                 * (a_o*np.sqrt(x_range/chord) \
                 + a_1*x_range/chord \
@@ -54,7 +54,7 @@ class newfoil(object):
                 + a_3*np.power((x_range/chord), 3) \
                 + a_4*np.power((x_range/chord), 4))
         y_rcamb = max_camb * x_range[0:pos_index]/pow(pos_camb, 2) * (2*pos_camb - x_range[0:pos_index]/chord)
-        y_fcamb = max_camb * (chord-x_range[pos_index:])/pow(1-pos_camb, 2) * (1+x_range[pos_index:]/c-2*pos_camb)
+        y_fcamb = max_camb * (chord-x_range[pos_index:])/pow(1-pos_camb, 2) * (1+x_range[pos_index:]/chord-2*pos_camb)
         theta_r = np.arctan(2*max_camb/pow(pos_camb, 2) * (pos_camb-x_range[0:pos_index]/chord))
         theta_f = np.arctan(2*max_camb/pow(1-pos_camb, 2) * (pos_camb-x_range[pos_index:]/chord))
         y_camb = np.concatenate([y_rcamb, y_fcamb])
@@ -75,47 +75,41 @@ class newfoil(object):
         grid(True)
         xlim(-.03, max(x_data) + .03)
         ylim(-max(x_data)/2.0, max(x_data)/2.0)
-        suptitle(codename)
+        suptitle("Airfoil " + codename)
         show()
-        pass
 
     def write_data(self, points, scale=1.0):
         x_data, y_data, codename = self.make_data(points, scale)
         filename = codename + ".txt"
         new_file = open(filename, "w")
-        for index in range(len(x_array)):
-            data_set = str(x_array[index]) + " " + str(y_array[index]) + " 0.0"
+        for index in range(len(x_data)):
+            data_set = str(x_data[index]) + " " + str(y_data[index]) + " 0.0"
             new_file.write(data_set + "\n")
         new_file.close()
 
 if __name__=="__main__":
 
     parser = ap.ArgumentParser(
-            descriptsion = "make customized airfoil data for various applications such as solidoworks"
+            description = "make customized airfoil data for various applications such as solidoworks"
             )
-    parser.add_argument("-m", "--max_camber",
-            action = "store",
+    parser.add_argument("max_camb",
             type = float,
             help = "defines max camber as percentage of airfoil chordlength. Suggested range from 0-9. Floating point or integers excepted. Use zero for a symmetrical airfoil."
             )
-    parser.add_argument("-p", "--pos_camb",
-            action = "store",
+    parser.add_argument("pos_camb",
             type = float,
             help = "position of max camber as percentage of chordlength. Suggested range 15-70. Autosets to zero if -m option also set to zero"
             )
-    parser.add_argument("-t", "--thick",
-            action = "store",
+    parser.add_argument("thick",
             type = float,
             help = "total thickness of airfoil in y direction as percentage of chordlength"
             )
-   parser.add_argument("-p", "--points",
-            action = "store",
+    parser.add_argument("points",
             type = int,
             help = "number of generated data points"
             )
-   parser.add_argument("-s", "--scale",
+    parser.add_argument("-s", "--scale",
             action = "store",
-            nargs = "?",
             type = float,
             help = "optional scaling factor. else equal to 1"
             )
@@ -129,7 +123,7 @@ if __name__=="__main__":
             )
     args = parser.parse_args()
 
-    airfoil = newfoil(args.max_camber, args.pos_camber, args.thick)
+    airfoil = newfoil(args.max_camb, args.pos_camb, args.thick)
     
     if args.scale:
         scale = args.scale
