@@ -1,6 +1,11 @@
-some cool tools for manipulating airfoil data yo
-The main point is to generate data that can be used with the curve fitting tool in solidworks and possibly other cad software for designing airfoils.
+Some cool tools for making and manipulating airfoil data yo
 
-makefoil.py allows you to generate your own custom airfoil curve data with a few key inputs using some awesome NACA airfoil math.
-the fromData dir holds two programs for scaling, fixing, and rewriting previously written data
-   
+The point of these tiny programs is to generate data that can be used with the curve fitting tool in solidworks and possibly other cad software for designing airfoils.
+
+- makefoil.py allows you to generate your own custom airfoil data with a few key inputs using some awesome NACA 4-digit airfoil math (see http://en.wikipedia.org/wiki/NACA_airfoil for further reading). The written file is in .txt format. ####.txt is an example of data written from makefoil.py. The output filename is generated from the four input parameters. 
+
+- airfoils.py is for cleaning, scaling, and rewriting existing airfoil data from plain text format. NACA_####.txt are samples of data that can be used with airfoils.py. Any data in the format seen in these example files is acceptable. Furthermore, if a third z-axis column exists in the data it will simply be ignored. Empty rows and rows containing words (such as titles) are dealt with in the code as well, although it cannot recognize rows containing only numbers that do not belong in the dataset (ex. a row that just gives the number of data points in the file). If such rows are not removed manually, the program will still run, but not produce a correct graph or write correct data. Always using the -p option to view a graph of your output data will ensure you get data that you are satisfied with, as the data plotted is identical to the data written.
+
+- airfoils2.py is for cleaning, scaling, rewriting AND hacking airfoil data. It can do everything airfoils.py can do plus an extra functionality: it has an option to find and return the parameters from the input data file that are required for running makefoil.py and NACA's web program for making 4-digit airfoil data (found at http://airfoiltools.com/airfoil/naca4digit). For example, if I have some airfoil data that has a shape I like, but it doesn't have enough data points for a smooth curve, I could use this option and input the results into makefoil.py with a higher number of data points.*
+
+*this functionality is not perfect yet! If you look at the two .png files included in this repo side by side you'll notice subtle differences in the shape. One is the original file, the other was created from the parameters found and input to makefoil.py.

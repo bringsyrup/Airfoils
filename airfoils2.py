@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 '''
-manipulate airfoil data and write it to new text file that can be used in solidworks
+manipulate existing airfoil data and write it to new text file that can be used in solidworks
 '''
 
 import numpy as np
 from matplotlib.pyplot import *
 import argparse
+import re
 
 class airfoil(object):
 
@@ -17,7 +18,8 @@ class airfoil(object):
         with open(self.data_in) as input_file:
             data_lists = []
             for line in input_file:
-                data_lists.append(line.strip().split())
+                if re.search("[a-zA-Z]", line) == None and re.search("[0-9]", line):
+                    data_lists.append(line.strip().split())
             if opt == True:
                 chord_pair = data_lists[0]
                 chord = float(chord_pair[0])
@@ -58,8 +60,29 @@ class airfoil(object):
         y_array = np.asarray(y_list)
         return x_array, y_array
 
-    def plot_data(self, x=1.0, opt=False):
+    def get_specs(self, x=1.0, opt=False):
         x_array, y_array = self.fix_data(x, opt)
+        for index in range(len(x_array)):
+            if x_array[index] == 0.0:
+                if index != 0:
+                    switch = index
+        if len(x_array) % 2 == 0:
+            y_upper = y_array[:switch]
+            y_lower = y_array[switch:]
+        else:
+            y_upper = y_array[:switch]
+            y_lower = y_array[switch+1:][::-1]
+        chord = max(x_array)
+        camber = abs(abs(y_upper) - abs(y_lower))
+        max_camb = max(camber)
+        pos_camb = x_array[np.where(camber == max_camb)][0]
+        thickness = max(abs(y_upper) + abs(y_lower))
+        return camber, switch, max_camb*100, pos_camb*100, thickness*100
+
+    def plot_data(self, x=1.0, opt=False):
+        camber, switch, a,b,c = self.get_specs(x, opt)
+        x_array, y_array = self.fix_data(x, opt)
+        plot(x_array[:switch], camber)
         plot(x_array, y_array, linestyle="-")
         xlabel("x coordinates, any units")
         ylabel("y coordinates, any units")
@@ -78,7 +101,7 @@ if __name__=="__main__":
             )
     parser.add_argument("data_in",
             type = str,
-            help = "must be .txt format containing x and y data columns. if data contains third column for z coordinates, it will be ignored and replaced with zeros. any whitespace between data points is used to split the data and eliminated"
+            help = "must be plain text format (.txt, .md, etc) containing x and y data columns. if data contains third column for z coordinates, it will be ignored and replaced with zeros. any whitespace between data points is used to split the data and eliminated"
             )
     
     parser.add_argument("-w", "--write",
@@ -98,6 +121,10 @@ if __name__=="__main__":
             action = "store_true",
             help = "plots the scaled data"
             )
+    parser.add_argument("-k", "--keyInfo",
+            action = "store_true",
+            help = "returns max camber, max camber position, and thickness of the airfoil. useful if the data you have is kinda bad/doesn't have enough data points for a smooth curve, etc. you can then plug the results into makefoil.py to get an airfoil with these parameters with desired number of data points/scaling"
+            )
     args = parser.parse_args()
     
     new_airfoil = airfoil(args.data_in)
@@ -107,19 +134,37 @@ if __name__=="__main__":
     else:
         opt_cond = False
 
+    def get_keyInfo():
+        a,b, max_camb, pos_camb, thickness = new_airfoil.get_specs()
+        print "max camber: %s%%"% max_camb
+        print "position of max camber: %s%%" % pos_camb
+        print "thickness of airfoil: %s%%" % thickness
+
     if args.write:
-        if args.scale and args.plot:
+        if args.scale and args.plot and args.keyInfo:
             new_airfoil.write_new(args.scale, opt_cond)
             new_airfoil.plot_data(args.scale, opt_cond)
-        elif args.scale:
+            get_keyInfo()
+        elif args.scale and args.keyInfo:
             new_airfoil.write_new(args.scale, opt_cond)
+            get_key_info()
+        elif args.plot and args.keyInfo:
+            new_airfoil.plot_data()
+            new_airfoil.write_new()
+            get_keyinfo()
         elif args.plot:
             new_airfoil.plot_data()
+        elif args.keyInfo:
+            get_keyInfo()
         else:
             new_airfoil.write_new()
     elif args.plot:
-        if args.scale:
+        if args.scale and args.keyInfo:
             new_airfoil.plot_data(args.scale, opt_cond)
+            get_keyInfo()
+        elif args.keyInfo:
+            new_airfoil.plot_data()
+            get_keyInfo()
         else:
             new_airfoil.plot_data()
     else:
